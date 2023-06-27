@@ -1,0 +1,43 @@
+{% extends "base.html"%}
+
+{% block content %}
+<div class="col-5">
+  <h1>PDF Page Splitter</h1>
+  <form class="form-horizontal" method="post" enctype="multipart/form-data">
+    <fieldset>
+    {{ form.hidden_tag() }}
+
+    <!-- Form Name -->
+    <legend>PDF Page Splitter</legend>
+    <p>Use the Choose button to select the PDF file you
+      want to split. Hit Submit and you will receive a
+      zip file containing a directory named "pdf"
+  containing the individual pages, one per file.</p>
+    <p>By default the files will be called "page_001.pdf",
+      "page_002.pdf" and so on, but you can enter a
+      prefix below to be used instead of "page".</p>
+
+    <!-- File Button -->
+    <div class="control-group">
+      <div class="controls">
+        {{ form.file_details(size=32) }}
+      </div>
+    </div>
+    <hr/>
+    <div class="control-group">
+      <label class="control-label" for="file_prefix">Alternate prefix ...</label>
+      <div class="controls">
+        {{ form.file_prefix(size=32) }}
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="control-group">
+      <label class="control-label" for="sbutton"></label>
+      <div class="controls">
+        {{ form.submit() }}
+    </div>
+    </fieldset>
+  </form>
+</div>
+{% endblock %}
