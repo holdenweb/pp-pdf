@@ -63,6 +63,17 @@ def get_or_post_pagezip():
 
 @pdf_blueprint.route("/booklet", methods=['GET', 'POST'])
 def get_or_post_booklet():
+    """
+    Post-design imposition of A6 booklets from A4 paper.
+
+    This page requests a file from the user, and returns a zipfile containing
+    its pages, shrunk to 50% and imposed four-up on A4. This allows creation
+    of a signature from each eight original pages, four-up on an even and an
+    odd side.
+
+    The even and odd sides are then written into separate PDF files and
+    packed in a zipfile, which is delivered to the user as a downloaded.
+    """
     form = BookletForm()
     logger.info("Booklet requested")
     if form.validate_on_submit():
@@ -81,5 +92,8 @@ def get_or_post_booklet():
                              as_attachment=True,
                              download_name="pages.zip")
         except Exception as e:
-            return f"I'm sorry, Dave, it seems I couldn't do that:\n{e}"
+            return f"""\
+I'm sorry, it seems I couldn't do that.
+Please report the following message if it makes no sense to you:
+{e}"""
     return render_template('booklet_form.html', form=form)

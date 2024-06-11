@@ -27,27 +27,44 @@ def make_booklet(in_doc, out_docs=None):
     doc_pages = PdfReader(in_doc).pages
     if out_docs is None:
         out_docs = (io.BytesIO(), io.BytesIO())
-    canvases = []
+    elif len(out_docs) != 2:
+        raise ValueError("An out_docs argument to make_booklet did not have two elements")
+    # Create an odd an and even side imposed page stream, to which PDF
+    # content will be written.
+    imp_sides = []
     for out_doc in out_docs:
-        canvases.append(canvas := Canvas(out_doc))
-        canvas.setPageSize(A4)
+        imp_sides.append(imp_side := Canvas(out_doc))
+        imp_side.setPageSize(A4)
+    # Iterate over the pages in groups of eight, each group
+    # of original pages being the two sides of a signature.
     for i in range(0, len(doc_pages), 8):
         pages = doc_pages[i:i+8]
-        for canvas, page_numbers in zip(canvases, page_layouts):
+        # Odd pages get sides 8, 1, 4 and 5
+        # Even pages get sides 2, 7, 6 and 3
+        for imp_side, page_numbers in zip(imp_sides, page_layouts):
             page_data = [(k, t) for (k, t) in zip(page_numbers, transforms)]
+            # Each of the four pages in the imposed layout has its own
+            # transform: x-offset, y-offset and rotation angle. Offsets are
+            # multiples of the unit width and length, respectively, and the
+            # rotation angle is in degrees.
             for page_number, (x, y, angle) in page_data:
+                # The final imposed page may not contain an exact multiple of
+                # four original pages, so we simply ignore requests for
+                # non-existent original pages, leaving them blank.
                 if page_number <= len(pages):
-                    page = pages[page_number-1]
-                    page = makerl(canvas, pagexobj(page))
-                    canvas.saveState()
-                    canvas.translate(x*width, y*height)
-                    canvas.rotate(angle)
-                    canvas.scale(0.5, 0.5)
-                    canvas.doForm(page)
-                    canvas.restoreState()
-            canvas.showPage()
-    for canvas in canvases:
-        canvas.save()
+                    orig_page = pages[page_number-1]
+                    orig_page = makerl(imp_side, pagexobj(orig_page))
+                    imp_side.saveState()
+                    imp_side.translate(x*width, y*height)
+                    imp_side.rotate(angle)
+                    imp_side.scale(0.5, 0.5)
+                    imp_side.doForm(orig_page)
+                    imp_side.restoreState()
+            imp_side.showPage()
+    # Save the generated PDFs
+    for imp_side in imp_sides:
+        imp_side.save()
+    # And return them to the caller
     return out_docs
 
 if __name__ == '__main__':
