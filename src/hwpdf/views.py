@@ -57,7 +57,7 @@ def get_or_post_pagezip():
                              download_name="pages.zip")
         except Exception:
             flash(f"Could not open file as a PDF - please try again")
-    return render_template('pagesplit_form.html', form=form)
+    return render_template('pagesplit_form.html', form=form, title="PDF Page Zipper")
 
 
 @pdf_blueprint.route("/booklet", methods=['GET', 'POST'])
@@ -91,8 +91,10 @@ def get_or_post_booklet():
                              as_attachment=True,
                              download_name="pages.zip")
         except Exception as e:
-            flash(f"""\
+            flash(
+                f"""\
 I'm sorry, it seems I couldn't do that.</br>
 Please report the following message if it makes no sense to you:</br>
-{e}""")
-    return render_template('booklet_form.html', form=form)
+{e}"""
+            )
+    return render_template('booklet_form.html', form=form, title="PDF Booklet Maker")
