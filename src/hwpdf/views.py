@@ -29,7 +29,7 @@ class BookletForm(FlaskForm):
     submit = SubmitField("Generate Booklet")
 
 
-class PDF_Form(FlaskForm):
+class SplitterForm(FlaskForm):
     file_details = FileField('file_details', validators=[DataRequired()])
     file_prefix = StringField('file_prefix')
     submit = SubmitField('Get Pages')
@@ -46,35 +46,6 @@ def root_page():
     md = markdown.Markdown()
     html = md.convert(content)
     return render_template("markdown.html", content=html, title="PDF Helpers")
-
-@pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
-def get_or_post_pagezip():
-    form = PDF_Form()
-    if form.validate_on_submit():
-        in_storage = request.files['file_details']
-        infile_name =  os.path.splitext(os.path.basename(in_storage.filename))[0]
-        file_prefix = request.form['file_prefix'] or 'page'
-        try:
-            inputpdf = pdfrw.PdfReader(fname=in_storage.stream)
-            outzip = BytesIO()
-            container = ZipFile(outzip, 'w')
-            for i, page in enumerate(inputpdf.pages):
-                output = pdfrw.PdfWriter()
-                file_name = f"{file_prefix}_{i+1:03}.pdf"
-                output.addpage(page)
-                outfile = BytesIO()
-                output.write(outfile)
-                container.writestr(f"{infile_name}/{file_name}",
-                                   outfile.getvalue())
-            container.close()
-            outzip.seek(0)
-            return send_file(outzip,
-                             mimetype="application/octet-stream",
-                             as_attachment=True,
-                             download_name=f"{infile_name}.pages.zip")
-        except Exception:
-            flash(f"Could not open file as a PDF - please try again")
-    return render_template('pagesplit_form.html', form=form, title="PDF Page Splitter")
 
 
 @pdf_blueprint.route("/booklet", methods=['GET', 'POST'])
@@ -115,3 +86,33 @@ Please report the following message if it makes no sense to you:</br>
 {e}"""
             )
     return render_template('booklet_form.html', form=form, title="PDF Booklet Maker")
+
+
+@pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
+def get_or_post_pagezip():
+    form = ()
+    if form.validate_on_submit():
+        in_storage = request.files['file_details']
+        infile_name =  os.path.splitext(os.path.basename(in_storage.filename))[0]
+        file_prefix = request.form['file_prefix'] or 'page'
+        try:
+            inputpdf = pdfrw.PdfReader(fname=in_storage.stream)
+            outzip = BytesIO()
+            container = ZipFile(outzip, 'w')
+            for i, page in enumerate(inputpdf.pages):
+                output = pdfrw.PdfWriter()
+                file_name = f"{file_prefix}_{i+1:03}.pdf"
+                output.addpage(page)
+                outfile = BytesIO()
+                output.write(outfile)
+                container.writestr(f"{infile_name}/{file_name}",
+                                   outfile.getvalue())
+            container.close()
+            outzip.seek(0)
+            return send_file(outzip,
+                             mimetype="application/octet-stream",
+                             as_attachment=True,
+                             download_name=f"{infile_name}.pages.zip")
+        except Exception:
+            flash(f"Could not open file as a PDF - please try again")
+    return render_template('pagesplit_form.html', form=form, title="PDF Page Splitter")
