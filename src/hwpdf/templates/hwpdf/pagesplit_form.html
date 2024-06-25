@@ -2,13 +2,12 @@
 
 {% block content %}
 <div class="col-9">
-  <h1>PDF Page Splitter</h1>
   <form class="form-horizontal" method="post" enctype="multipart/form-data">
     <fieldset>
     {{ form.hidden_tag() }}
 
     <!-- Form Name -->
-    <legend>PDF Page Splitter</legend>
+    <legend>Split PDF documents into individual pages</legend>
     <p>Use the Choose button to select the PDF file you
       want to split. Hit Submit and you will receive a
       zip file containing a directory named "pdf"
