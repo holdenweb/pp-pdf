@@ -1,6 +1,7 @@
 """
 pdf.py: Various bits of PDF functionality
 """
+import os
 from io import BytesIO
 from logging import getLogger
 from zipfile import ZipFile
@@ -9,9 +10,15 @@ from booklet import make_booklet
 from flask_wtf import FlaskForm
 from flask import (Blueprint, Flask, Response, render_template, flash,
                    send_file, redirect, request, url_for)
+import markdown
 import pdfrw
 from wtforms import FileField, SubmitField, StringField
 from wtforms.validators import DataRequired
+
+
+
+
+
 
 logger = getLogger(__name__)
 pdf_blueprint = Blueprint("PDF Handling", __name__)
@@ -29,16 +36,26 @@ class PDF_Form(FlaskForm):
 
 @pdf_blueprint.route("/", methods=['GET'])
 def root_page():
-    return Response("Here are some PDF things you can do!")
+    content = """\
+## PDF Helper Utilities
+
+[**PDF Splitter**](./pagezip)
+
+[**PDF Booklet Maker**](./booklet)
+"""
+    md = markdown.Markdown()
+    html = md.convert(content)
+    return render_template("markdown.html", content=html, title="PDF Helpers")
 
 @pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
 def get_or_post_pagezip():
     form = PDF_Form()
     if form.validate_on_submit():
-        my_file = request.files['file_details']
+        in_storage = request.files['file_details']
+        infile_name =  os.path.splitext(os.path.basename(in_storage.filename))[0]
         file_prefix = request.form['file_prefix'] or 'page'
         try:
-            inputpdf = pdfrw.PdfReader(fname=my_file.stream)
+            inputpdf = pdfrw.PdfReader(fname=in_storage.stream)
             outzip = BytesIO()
             container = ZipFile(outzip, 'w')
             for i, page in enumerate(inputpdf.pages):
@@ -47,17 +64,17 @@ def get_or_post_pagezip():
                 output.addpage(page)
                 outfile = BytesIO()
                 output.write(outfile)
-                container.writestr(f"pdf/{file_name}",
+                container.writestr(f"{infile_name}/{file_name}",
                                    outfile.getvalue())
             container.close()
             outzip.seek(0)
             return send_file(outzip,
                              mimetype="application/octet-stream",
                              as_attachment=True,
-                             download_name="pages.zip")
+                             download_name=f"{infile_name}.pages.zip")
         except Exception:
             flash(f"Could not open file as a PDF - please try again")
-    return render_template('pagesplit_form.html', form=form, title="PDF Page Zipper")
+    return render_template('pagesplit_form.html', form=form, title="PDF Page Splitter")
 
 
 @pdf_blueprint.route("/booklet", methods=['GET', 'POST'])
