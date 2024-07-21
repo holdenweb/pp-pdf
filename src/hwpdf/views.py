@@ -39,9 +39,9 @@ def root_page():
     content = """\
 ## PDF Helper Utilities
 
-[**PDF Splitter**](./pagezip)
+[**PDF Splitter**](./pagezip) - split a PDF file into its individuakl pages
 
-[**PDF Booklet Maker**](./booklet)
+[**PDF Booklet Maker**](./booklet) - turn any PDF document into an A6 booklet
 """
     md = markdown.Markdown()
     html = md.convert(content)
@@ -90,7 +90,7 @@ Please report the following message if it makes no sense to you:</br>
 
 @pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
 def get_or_post_pagezip():
-    form = ()
+    form = SplitterForm()
     if form.validate_on_submit():
         in_storage = request.files['file_details']
         infile_name =  os.path.splitext(os.path.basename(in_storage.filename))[0]
