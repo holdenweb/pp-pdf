@@ -7,32 +7,15 @@ from logging import getLogger
 from zipfile import ZipFile
 
 from booklet import make_booklet
-from flask_wtf import FlaskForm
-from flask import (Blueprint, Flask, Response, render_template, flash,
-                   send_file, redirect, request, url_for)
+from flask import (Blueprint, render_template, flash, send_file, request)
 import markdown
 import pdfrw
-from wtforms import FileField, SubmitField, StringField
-from wtforms.validators import DataRequired
 
-
-
-
-
+from forms import PDFBookletForm, PDFSplitterForm
 
 logger = getLogger(__name__)
 pdf_blueprint = Blueprint("PDF Handling", __name__)
 
-
-class BookletForm(FlaskForm):
-    file_details = FileField('file_details', validators=[DataRequired()])
-    submit = SubmitField("Generate Booklet")
-
-
-class SplitterForm(FlaskForm):
-    file_details = FileField('file_details', validators=[DataRequired()])
-    file_prefix = StringField('file_prefix')
-    submit = SubmitField('Get Pages')
 
 @pdf_blueprint.route("/", methods=['GET'])
 def root_page():
@@ -61,7 +44,7 @@ def get_or_post_booklet():
     The even and odd sides are then written into separate PDF files and
     packed in a zipfile, which is delivered to the user as a downloaded.
     """
-    form = BookletForm()
+    form = PDFBookletForm()
     logger.info("Booklet requested")
     if form.validate_on_submit():
         my_file = request.files['file_details']
@@ -90,7 +73,7 @@ Please report the following message if it makes no sense to you:</br>
 
 @pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
 def get_or_post_pagezip():
-    form = SplitterForm()
+    form = PDFSplitterForm()
     if form.validate_on_submit():
         in_storage = request.files['file_details']
         infile_name =  os.path.splitext(os.path.basename(in_storage.filename))[0]
