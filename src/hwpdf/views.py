@@ -6,12 +6,12 @@ from io import BytesIO
 from logging import getLogger
 from zipfile import ZipFile
 
-from booklet import make_booklet
+from .booklet import make_booklet
 from flask import (Blueprint, render_template, flash, send_file, request)
 import markdown
 import pdfrw
 
-from forms import PDFBookletForm, PDFSplitterForm
+from .forms import PDFBookletForm, PDFSplitterForm
 
 logger = getLogger(__name__)
 pdf_blueprint = Blueprint("PDF Handling", __name__)
