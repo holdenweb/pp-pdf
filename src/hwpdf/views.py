@@ -14,7 +14,7 @@ import pdfrw
 from .forms import PDFBookletForm, PDFSplitterForm
 
 logger = getLogger(__name__)
-pdf_blueprint = Blueprint("PDF Handling", __name__)
+pdf_blueprint = Blueprint("pdf_processor", __name__)
 
 
 @pdf_blueprint.route("/", methods=['GET'])
