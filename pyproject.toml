@@ -1,0 +1,30 @@
+[project]
+name = "hwpdf"
+version = "0.1.0"
+description = "PDF booklet-imposition and page-splitting tools as an installable Flask blueprint"
+readme = "README.md"
+requires-python = ">=3.12, <4.0"
+dependencies = [
+    "flask (>=2.3.3)",
+    "flask-wtf (>=1.2.1)",
+    "wtforms (>=3.0)",
+    "pdfrw (>=0.4)",
+    "reportlab (>=3.6.12)",
+]
+
+[[project.authors]]
+name = "Steve Holden"
+email = "steve@holdenweb.com"
+
+# Discovery hook for the site platform: a site enumerates its installed apps by
+# iterating this group instead of hard-coding imports. The value resolves to the
+# blueprint itself -- the mount point is the site's decision, as in Django.
+[project.entry-points."holdenweb.apps"]
+pdf = "hwpdf:pdf_blueprint"
+
+[build-system]
+requires = [ "uv_build>=0.8.4,<0.9.0",]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [ "pytest>=9.1.1",]
