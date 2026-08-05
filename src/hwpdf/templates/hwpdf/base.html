@@ -1,0 +1,31 @@
+{# Fallback layout, used only when the host site does not supply its own.
+
+   A site overrides it by adding templates/hwpdf/base.html containing
+   `{% extends "its-own-base.html" %}` -- Flask searches the application's
+   template folder before any blueprint's, so that file simply wins. Bootstrap
+   is loaded here because the form templates use its classes. #}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ title or "PDF tools" }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+      body { max-width: 46rem; margin: 2rem auto; padding: 0 1rem; }
+      .flashes { color: darkred; }
+    </style>
+  </head>
+  <body>
+    <h1>{{ title }}</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}<li>{{ message|safe }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{{ content | safe }}{% endblock %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

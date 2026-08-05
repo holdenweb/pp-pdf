@@ -14,7 +14,3 @@ class PDFSplitterForm(FlaskForm):
     submit = SubmitField('Get Pages')
 
 
-class QRcode_Form(FlaskForm):
-    qrcode_text = StringField('qrcode_text')
-    submit = SubmitField('Get QR Code')
-

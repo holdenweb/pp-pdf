@@ -1,6 +1,4 @@
-"""
-pdf.py: Various bits of PDF functionality
-"""
+"""Views for the PDF helper utilities: booklet imposition and page splitting."""
 import os
 from io import BytesIO
 from logging import getLogger
@@ -8,27 +6,17 @@ from zipfile import ZipFile
 
 from .booklet import make_booklet
 from flask import (Blueprint, render_template, flash, send_file, request)
-import markdown
 import pdfrw
 
 from .forms import PDFBookletForm, PDFSplitterForm
 
 logger = getLogger(__name__)
-pdf_blueprint = Blueprint("pdf_processor", __name__)
+pdf_blueprint = Blueprint("pdf_processor", __name__, template_folder="templates")
 
 
 @pdf_blueprint.route("/", methods=['GET'])
 def root_page():
-    content = """\
-## PDF Helper Utilities
-
-[**PDF Splitter**](./pagezip) - split a PDF file into its individuakl pages
-
-[**PDF Booklet Maker**](./booklet) - turn any PDF document into an A6 booklet
-"""
-    md = markdown.Markdown()
-    html = md.convert(content)
-    return render_template("markdown.html", content=html, title="PDF Helpers")
+    return render_template("hwpdf/index.html", title="PDF Helpers")
 
 
 @pdf_blueprint.route("/booklet", methods=['GET', 'POST'])
@@ -68,7 +56,7 @@ I'm sorry, it seems I couldn't do that.</br>
 Please report the following message if it makes no sense to you:</br>
 {e}"""
             )
-    return render_template('booklet_form.html', form=form, title="PDF Booklet Maker")
+    return render_template('hwpdf/booklet_form.html', form=form, title="PDF Booklet Maker")
 
 
 @pdf_blueprint.route("/pagezip", methods=['GET', 'POST'])
@@ -98,4 +86,4 @@ def get_or_post_pagezip():
                              download_name=f"{infile_name}.pages.zip")
         except Exception:
             flash(f"Could not open file as a PDF - please try again")
-    return render_template('pagesplit_form.html', form=form, title="PDF Page Splitter")
+    return render_template('hwpdf/pagesplit_form.html', form=form, title="PDF Page Splitter")

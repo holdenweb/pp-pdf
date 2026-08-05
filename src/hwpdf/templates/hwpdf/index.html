@@ -1,0 +1,10 @@
+{% extends "hwpdf/base.html" %}
+{% block content %}
+<h2>PDF Helper Utilities</h2>
+<ul>
+  <li><a href="{{ url_for('pdf_processor.get_or_post_pagezip') }}"><strong>PDF Splitter</strong></a>
+      &mdash; split a PDF file into its individual pages</li>
+  <li><a href="{{ url_for('pdf_processor.get_or_post_booklet') }}"><strong>PDF Booklet Maker</strong></a>
+      &mdash; turn any PDF document into an A6 booklet</li>
+</ul>
+{% endblock %}
