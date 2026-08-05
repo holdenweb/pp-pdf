@@ -106,3 +106,14 @@ The test suite registers the blueprint on a **bare** `Flask` app with no
 holdenweb configuration, pushes real reportlab-generated PDFs through both
 tools, and asserts that mounting at a non-default prefix and overriding the
 layout both work. If it passes, the package is genuinely self-contained.
+
+To look at the pages without a host site:
+
+```bash
+uv run python devserver.py     # http://127.0.0.1:8459/pdf/
+```
+
+Note that the two form templates carry Bootstrap **3** class names
+(`form-horizontal`, `control-group`, `controls`), inherited from the site they
+came from. Bootstrap 4 dropped those, so the forms render as unstyled native
+controls — functional, but worth modernising.
