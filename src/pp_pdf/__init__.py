@@ -75,10 +75,9 @@ else:
     from podpack import Section, SiteApp
 
     site_app = SiteApp(
-        # `name` is the blueprint's own name, because podpack resolves this app's
-        # data directory and config namespace from `request.blueprint`. Nothing
-        # checks that they agree; if they diverge, both go quietly wrong.
-        name="pp_pdf",
+        # This app's name is the blueprint's own -- podpack derives it, so the
+        # template namespace, the data directory and the `[apps.pp_pdf]` config
+        # section all follow from `Blueprint("pp_pdf", ...)` in views.py.
         blueprint=pdf_blueprint,
         # Where this app asks to be mounted. A site that wants it elsewhere
         # says so with `url_prefix` in `[apps.pp_pdf]`, and the nav entry below

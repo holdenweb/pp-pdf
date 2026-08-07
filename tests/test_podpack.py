@@ -70,16 +70,11 @@ def client(app):
 def test_site_app_conforms():
     assert isinstance(site_app, SiteApp)
     assert site_app.blueprint is pdf_blueprint
-
-
-def test_app_name_matches_blueprint_name():
-    """The invariant podpack relies on and does not check.
-
-    `data_dir()` and `app_config()` both resolve the current app from
-    `request.blueprint`. If these two names ever diverge, the app reads an empty
-    config and a directory that was never created -- and says nothing about it.
-    """
-    assert site_app.name == site_app.blueprint.name
+    # podpack derives the app's name from the blueprint, so this is the name
+    # that decides the template namespace, the data directory and the config
+    # section. It used to be declared separately here and had to be kept in
+    # step by hand; asserting it is now the framework's job, not this app's.
+    assert site_app.name == "pp_pdf"
 
 
 def test_installs_from_the_app_list_alone(client):
