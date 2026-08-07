@@ -1,0 +1,18 @@
+{# Every page in this app extends this file, and this file extends whatever the
+   host has said should wrap it:
+
+     a site's own templates/pp_pdf/base.html   shadows this file entirely
+     podpack                                   "base.html" -- the site's chrome
+     plain Flask                               pp_pdf/standalone.html, shipped here
+
+   The name arrives as `pdf_layout` from a context processor on the blueprint.
+   Jinja resolves `{% extends %}` against a variable perfectly well, but cannot
+   be handed a list of candidates to try -- `extends` compiles to
+   `environment.get_template`, not `get_or_select_template` -- so the choice is
+   made in Python, where it is also inspectable as the config key
+   PP_PDF_BASE_TEMPLATE rather than being buried in a template.
+
+   Child templates may fill `content` and `title`, which both known layouts
+   define. A block no ancestor renders is dropped silently, so anything else is
+   layout-specific and will vanish without warning on the other one. #}
+{% extends pdf_layout %}

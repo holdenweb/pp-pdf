@@ -1,0 +1,25 @@
+{% extends "pp_pdf/base.html" %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  <fieldset>
+    {{ form.hidden_tag() }}
+    <legend>Make your own tiny booklets</legend>
+
+    <p>Use the Choose button to select a PDF file. Hit Submit and you will
+    receive a zip file containing two PDF files, one of odd sides and one of
+    even sides. Print the even sides, then run the same paper through to print
+    the odd sides.</p>
+    <p>The returned file is called "pages.zip", and holds "odd.pdf" and
+    "even.pdf" in a directory named "pdf".</p>
+
+    <div class="field">
+      {{ form.file_details(size=32) }}
+    </div>
+    <hr>
+    <div class="field">
+      {{ form.submit() }}
+    </div>
+  </fieldset>
+</form>
+{% endblock %}

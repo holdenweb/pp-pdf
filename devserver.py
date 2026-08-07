@@ -5,7 +5,7 @@ host site, which is also the quickest check that it needs nothing from one.
 """
 from flask import Flask
 
-from hwpdf import pdf_blueprint
+from pp_pdf import pdf_blueprint
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "dev-only"

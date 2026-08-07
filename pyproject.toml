@@ -1,7 +1,7 @@
 [project]
-name = "hwpdf"
-version = "0.1.0"
-description = "PDF booklet-imposition and page-splitting tools as an installable Flask blueprint"
+name = "pp-pdf"
+version = "0.2.0"
+description = "PDF booklet-imposition and page-splitting tools as an installable Flask app"
 readme = "README.md"
 requires-python = ">=3.12, <4.0"
 dependencies = [
@@ -16,11 +16,14 @@ dependencies = [
 name = "Steve Holden"
 email = "steve@holdenweb.com"
 
-# Discovery hook for the site platform: a site enumerates its installed apps by
-# iterating this group instead of hard-coding imports. The value resolves to the
-# blueprint itself -- the mount point is the site's decision, as in Django.
+# Discovery hook for a site with no framework: it enumerates its installed apps
+# by iterating this group instead of hard-coding imports, and the value resolves
+# to the blueprint itself. The entry-point *name* is a mount hint -- the
+# documented consumer does url_prefix=f"/{entry_point.name}/" -- and is
+# deliberately not the app's name. podpack does not use entry points at all; it
+# imports `pp_pdf` by name from the site's app list and reads `site_app`.
 [project.entry-points."holdenweb.apps"]
-pdf = "hwpdf:pdf_blueprint"
+pdf = "pp_pdf:pdf_blueprint"
 
 [build-system]
 requires = [ "uv_build>=0.8.4,<0.9.0",]
@@ -28,3 +31,18 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [ "pytest>=9.1.1",]
+
+# podpack is deliberately absent from this file. It is a sibling working tree
+# rather than a published package, and every way of declaring it -- an extra, a
+# dependency group, a `[tool.uv.sources]` path -- binds at *lock* time, not at
+# sync time: `uv lock` and plain `uv sync` then both fail outright on a machine
+# that has not checked podpack out. That would make the framework mandatory for
+# anyone merely working on this package, which is the opposite of the point.
+#
+# So the conformance suite opts in at the venv instead, leaving the lock alone:
+#
+#     uv sync
+#     uv pip install -e ../podpack     # optional
+#     uv run pytest
+#
+# tests/test_podpack.py skips itself when that second line has not been run.

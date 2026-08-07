@@ -4,7 +4,7 @@ import zipfile
 from flask import Flask
 from reportlab.pdfgen.canvas import Canvas
 
-from hwpdf import pdf_blueprint
+from pp_pdf import pdf_blueprint
 
 
 def _pdf_of(pages):
@@ -66,13 +66,55 @@ def test_mounts_at_any_prefix():
     assert b"/tools/pdf/booklet" in response.data
 
 
+def test_oversized_document_is_refused_not_split(app, client):
+    """The zip is built in memory, one member per page, so the limit is real.
+
+    A refusal, not an error: the document is perfectly readable, we just decline
+    to explode it. Under podpack the limit comes from `[apps.pp_pdf] max_pages`.
+    """
+    app.config["PP_PDF_MAX_PAGES"] = 2
+    response = client.post(
+        "/pdf/pagezip",
+        data={"file_details": (_pdf_of(3), "three.pdf"), "file_prefix": "page"},
+        content_type="multipart/form-data",
+    )
+    assert response.status_code == 200
+    assert b"splits at most 2" in response.data
+    assert b"Could not open file" not in response.data  # not swallowed as a read error
+
+
+def test_standalone_layout_is_a_complete_document(client):
+    """With no chrome anywhere, the pages must still be a whole page.
+
+    This is the half of the contract podpack cannot supply, and the reason the
+    fallback layout survived the move to podpack rather than being deleted in
+    favour of the framework's own.
+    """
+    body = client.get("/pdf/").get_data(as_text=True)
+    assert "pp-pdf standalone layout" in body
+    assert body.lstrip().startswith("<!DOCTYPE html>")
+    assert "</html>" in body
+
+
+def test_ships_no_unqualified_base_template():
+    """This package must never supply a template called `base.html`.
+
+    Flask searches every registered blueprint's templates for any name the
+    application itself does not supply. A `base.html` here would therefore become
+    *the* site-wide base for a podpack site and silently reparent every other
+    installed app -- a failure with no error message and no obvious cause. The
+    fallback layout is namespaced like everything else, and this pins it.
+    """
+    assert "base.html" not in pdf_blueprint.jinja_loader.list_templates()
+
+
 def test_host_site_can_override_the_layout(tmp_path):
-    """A site's own templates/hwpdf/base.html must shadow the package's.
+    """A site's own templates/pp_pdf/base.html must shadow the package's.
 
     This is the whole override mechanism -- Flask searches the application's
     template folder before any blueprint's -- so it is worth pinning down.
     """
-    site_templates = tmp_path / "templates" / "hwpdf"
+    site_templates = tmp_path / "templates" / "pp_pdf"
     site_templates.mkdir(parents=True)
     (site_templates / "base.html").write_text(
         "<!DOCTYPE html><html><body><p>site chrome</p>"

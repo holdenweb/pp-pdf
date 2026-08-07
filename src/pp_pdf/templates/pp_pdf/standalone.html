@@ -1,0 +1,41 @@
+{# The layout for a host that supplies none: a complete document, because with
+   no site to inherit from there is nothing else to be.
+
+   Under podpack this file is never reached -- the site's own base.html is. It
+   carries its own small stylesheet rather than loading a CSS framework, so that
+   the pages have no opinion to impose when they are rendered inside someone
+   else's chrome. The marker in the comment below is how the tests tell which of
+   the two layouts actually rendered. #}
+<!DOCTYPE html>
+<!-- pp-pdf standalone layout -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ title or "PDF tools" }}{% endblock %}</title>
+    {% block styles %}
+    <style>
+      body { max-width: 46rem; margin: 2rem auto; padding: 0 1rem;
+             font-family: system-ui, sans-serif; line-height: 1.5; }
+      fieldset { border: 1px solid #ccc; padding: 1rem 1.25rem; }
+      legend { font-weight: 600; padding: 0 .5rem; }
+      label { display: block; margin-bottom: .25rem; }
+      .field { margin: 1rem 0; }
+      input[type=submit] { padding: .4rem 1rem; }
+      .flashes { color: darkred; }
+    </style>
+    {% endblock %}
+  </head>
+  <body>
+    <h1>{{ title }}</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
