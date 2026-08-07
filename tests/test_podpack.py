@@ -123,7 +123,16 @@ def test_the_site_can_mount_this_app_where_it_likes(site):
     is the podpack equivalent, and the nav entry follows for free because it
     names an endpoint rather than a path.
     """
-    app = site(host_config={"apps": {"pp_pdf": {"url_prefix": "/tools/pdf"}}})
+    app = site(
+        host_config={
+            "site": {
+                **HOST_CONFIG["site"],
+                # Site policy, so it lives here rather than in `[apps.pp_pdf]`;
+                # this app never sees where it was put.
+                "mounts": {"pp_pdf": "/tools/pdf"},
+            }
+        }
+    )
     client = app.test_client()
 
     assert client.get("/tools/pdf/").status_code == 200

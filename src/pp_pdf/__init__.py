@@ -80,9 +80,9 @@ else:
         # section all follow from `Blueprint("pp_pdf", ...)` in views.py.
         blueprint=pdf_blueprint,
         # Where this app asks to be mounted. A site that wants it elsewhere
-        # says so with `url_prefix` in `[apps.pp_pdf]`, and the nav entry below
-        # follows without either side restating it, because it names an
-        # endpoint rather than a path.
+        # says so in `[site.mounts]`, where its own policy lives -- this app
+        # never learns the answer. The nav entry below follows without either
+        # side restating it, because it names an endpoint rather than a path.
         url_prefix="/pdf",
         nav=(Section("PDF tools", "pp_pdf.root_page"),),
         init=_init,

@@ -114,17 +114,21 @@ follows without either side restating it — a `Section` names an endpoint, so
 podpack resolves it with `url_for` as the chrome renders:
 
 ```toml
-[apps.pp_pdf]
-url_prefix = "/tools/pdf"
+[site.mounts]
+pp_pdf = "/tools/pdf"
 ```
+
+That lives under `[site]`, not in `[apps.pp_pdf]`, because it is the site's
+policy rather than this package's configuration — `app_config()` returns only
+what this app is meant to read, and where it was mounted is not among it.
 
 So the mount point is the host's under either contract; only the way of saying
 so differs — an argument to `register_blueprint` there, a line of config here.
 
-`name` must equal the blueprint's own name, because podpack resolves an app's
-data directory and config namespace from `request.blueprint`. Nothing checks that
-they agree; if they diverge, `app_config()` returns `{}` and the data directory
-silently does not exist. There is a test for it.
+This app's **name is its blueprint's name**: podpack derives it, so
+`Blueprint("pp_pdf", …)` in `views.py` is what decides the template namespace,
+the data directory and the `[apps.pp_pdf]` config section. There is nothing to
+keep in step by hand.
 
 podpack is an **optional** import here — it is on no package index, and this
 package's first contract is to need no framework at all. Where it is absent,
@@ -138,7 +142,7 @@ package's first contract is to need no framework at all. Where it is absent,
 | --- | --- | --- |
 | Discovery | `holdenweb.apps` entry point, or a direct import | import name in the site's `apps` list |
 | What is discovered | the `Blueprint` | `site_app: SiteApp` |
-| Mount point | the host's argument to `register_blueprint` | `[apps.pp_pdf] url_prefix`, defaulting to the app's own |
+| Mount point | the host's argument to `register_blueprint` | `[site.mounts] pp_pdf`, defaulting to the app's own |
 | Setup hook | `pdf_blueprint.record_once` | `SiteApp.init` |
 | Page layout | `pp_pdf/standalone.html`, shipped here | the site's `base.html` |
 | Configuration | `app.config["PP_PDF_…"]` | `[apps.pp_pdf]` in the site's TOML |
