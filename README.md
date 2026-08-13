@@ -100,13 +100,16 @@ from it:
 
 ```python
 site_app = SiteApp(
-    name="pp_pdf",
     blueprint=pdf_blueprint,
     url_prefix="/pdf",
     nav=(Section("PDF tools", "pp_pdf.root_page"),),
     init=_init,
 )
 ```
+
+The app's name is not declared: podpack derives it from the blueprint's own
+name, so `pp_pdf` — the template namespace, the config section, the data
+directory — follows from `Blueprint("pp_pdf", ...)` in views.py.
 
 `url_prefix` is what this app asks for, not what it is entitled to. A site that
 wants these pages somewhere else in its address space says so, and the nav entry
