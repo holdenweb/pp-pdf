@@ -44,6 +44,9 @@ def site(monkeypatch, tmp_path):
     """
     monkeypatch.setenv("SECRET_KEY", "test-secret-key")
     monkeypatch.setenv("SQLALCHEMY_DATABASE_URI", "sqlite:///:memory:")
+    # Required since podpack 0.5.2, when login became core: podpack refuses
+    # to boot without it, whether or not the site or this app uses login.
+    monkeypatch.setenv("SECURITY_PASSWORD_SALT", "test-password-salt")
 
     def _build(**overrides):
         host_config = {**HOST_CONFIG, **overrides.pop("host_config", {})}
