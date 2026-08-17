@@ -30,19 +30,17 @@ requires = [ "uv_build>=0.8.4,<0.9.0",]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = [ "pytest>=9.1.1",]
+# podpack is here rather than in `dependencies`, which is the important half:
+# an app must not pin the framework version of the site installing it. A
+# dependency group is dev-only metadata and constrains nobody downstream.
+#
+# It used to be absent from this file altogether, opted into by hand with
+# `uv pip install -e ../podpack`, because podpack was a sibling working tree
+# rather than a published package -- so any declaration would have bound at
+# *lock* time and made `uv lock` fail outright on a machine without that
+# checkout. A git source has no such requirement: it needs a network, not a
+# neighbour. `uv sync && uv run pytest` now works anywhere.
+dev = [ "pytest>=9.1.1", "podpack",]
 
-# podpack is deliberately absent from this file. It is a sibling working tree
-# rather than a published package, and every way of declaring it -- an extra, a
-# dependency group, a `[tool.uv.sources]` path -- binds at *lock* time, not at
-# sync time: `uv lock` and plain `uv sync` then both fail outright on a machine
-# that has not checked podpack out. That would make the framework mandatory for
-# anyone merely working on this package, which is the opposite of the point.
-#
-# So the conformance suite opts in at the venv instead, leaving the lock alone:
-#
-#     uv sync
-#     uv pip install -e ../podpack     # optional
-#     uv run pytest
-#
-# tests/test_podpack.py skips itself when that second line has not been run.
+[tool.uv.sources]
+podpack = { git = "https://github.com/holdenweb/podpack.git" }

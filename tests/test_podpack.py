@@ -15,9 +15,10 @@ at collection time and break the whole suite where podpack is absent.
 
 import pytest
 
-pytest.importorskip(
-    "podpack", reason="podpack is a sibling checkout, not a published package"
-)
+# Kept as a guard for `--no-dev` runs, where the dev group is absent. It no
+# longer fires for an ordinary `uv sync`: podpack is locked from its
+# repository rather than opted into by hand.
+pytest.importorskip("podpack", reason="podpack is a dev dependency; run without --no-dev")
 
 from podpack import Section, SiteApp, app_config, create_app  # noqa: E402
 

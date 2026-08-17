@@ -226,17 +226,20 @@ layout, and refusing an oversized document all work. If it passes, the package
 is genuinely self-contained.
 
 The podpack conformance suite installs the app into a real podpack site and
-checks the other contract. podpack is deliberately not a declared dependency —
-every way of declaring it binds at *lock* time, which would make the framework
-mandatory for anyone merely working on this package. So it goes into the venv
-and not into the lock file:
+checks the other contract. It needs no setting up:
 
 ```bash
-uv pip install -e ../podpack
+uv sync
 uv run pytest
 ```
 
-`tests/test_podpack.py` skips itself when that has not been run.
+podpack is a **dev** dependency, sourced from its repository — never a real
+one, because an app must not pin the framework version of the site installing
+it. It used to be absent from the lock altogether, opted into by hand with
+`uv pip install -e ../podpack`, because podpack was a sibling working tree and
+any declaration would have made `uv lock` fail on a machine that had not
+checked it out. A git source needs a network rather than a neighbour, so that
+restriction is gone.
 
 To look at the pages without a host site of any kind:
 
