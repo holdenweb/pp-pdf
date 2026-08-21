@@ -13,6 +13,8 @@ Deliberately not in conftest.py: a conftest importing podpack would be imported
 at collection time and break the whole suite where podpack is absent.
 """
 
+import sys
+
 import pytest
 
 # Kept as a guard for `--no-dev` runs, where the dev group is absent. It no
@@ -71,6 +73,37 @@ def client(app):
     return app.test_client()
 
 
+@pytest.fixture
+def site_package(tmp_path):
+    """An importable stand-in site package with the given templates.
+
+    A real site is a package with its own `templates/`, and template
+    precedence cannot be tested without one -- which is the whole reason the
+    hijack test below needs it.
+    """
+    created = []
+
+    def _make(name, templates):
+        root = tmp_path / name
+        (root / "templates").mkdir(parents=True)
+        (root / "__init__.py").write_text("")
+        for path, content in templates.items():
+            target = root / "templates" / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content)
+        created.append(name)
+        if str(tmp_path) not in sys.path:
+            sys.path.insert(0, str(tmp_path))
+        return name
+
+    yield _make
+
+    for name in created:
+        sys.modules.pop(name, None)
+    if str(tmp_path) in sys.path:
+        sys.path.remove(str(tmp_path))
+
+
 def test_site_app_conforms():
     assert isinstance(site_app, SiteApp)
     assert site_app.blueprint is pdf_blueprint
@@ -103,15 +136,26 @@ def test_pages_wear_the_sites_chrome(app, client):
     assert "pp-pdf standalone layout" not in body
 
 
-def test_does_not_hijack_the_sites_base_template(client):
+def test_does_not_hijack_the_sites_base_template(site, site_package):
     """Installing this app must not change how the rest of the site renders.
 
-    Flask searches every blueprint's templates, so a `base.html` shipped here
-    would quietly become the base for every other installed app.
+    podpack searches site templates, then every blueprint's, then its own
+    defaults -- so an app shipping a top-level `base.html` would beat
+    podpack's fallback and quietly become the base for every other installed
+    app on any site that has not written a `base.html` of its own.
+
+    Which is why this builds a site package that deliberately has no
+    `base.html`. The earlier version of this test passed `create_app` no
+    `site_package` at all, and in that configuration podpack *is* the Flask
+    application -- `Flask(site_package or __name__)` -- so its own templates
+    are the application's and are searched before any blueprint's. The hijack
+    could not happen, the test could not fail, and it was checked by shipping
+    the exact offending file and watching it pass anyway.
     """
-    body = client.get("/").get_data(as_text=True)
+    built = site(site_package=site_package("faux_site", {"faux/marker.html": "x"}))
+    body = built.test_client().get("/").get_data(as_text=True)
+
     assert "Served by podpack" in body
-    assert "pp-pdf standalone layout" not in body
 
 
 def test_nav_entry_is_contributed_and_actually_resolves(app, client):
