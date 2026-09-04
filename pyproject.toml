@@ -1,6 +1,6 @@
 [project]
 name = "pp-pdf"
-version = "0.2.0"
+version = "0.2.1"
 description = "PDF booklet-imposition and page-splitting tools as an installable Flask app"
 readme = "README.md"
 requires-python = ">=3.12, <4.0"
